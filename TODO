@@ -1,0 +1,7 @@
+add source name to scan start
+add DDD-HHMM scan names using the start date
+
+post a subset on individual telescope-backend channels
+  1 hour, 5 minute, end
+
+audible announcements? SPT does this with "say" CLI tool on macs
