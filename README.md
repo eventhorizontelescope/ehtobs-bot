@@ -14,5 +14,7 @@ Notifications are currently:
 
 Usage:
 
+```
 $ make check-secrets
 $ python ehtobs-bot.py VEXFILE
+```
