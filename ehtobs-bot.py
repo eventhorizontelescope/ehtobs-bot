@@ -19,7 +19,7 @@ def get_events(vexfile):
     all_stations = set()
     sfirst = {}
     slast = {}
-    
+
     for scan in v['SCHED'].values():
         if 'Scan' not in str(type(scan)):
             continue
@@ -51,6 +51,8 @@ def get_events(vexfile):
             s_ends.append(s_end)
 
         if any(x != s_starts[0] for x in s_starts):
+            for x in s_starts:
+                print(x)
             raise ValueError('different s_start in', s_starts)
         if any(x != s_ends[0] for x in s_ends):
             raise ValueError('different s_start in', s_ends)

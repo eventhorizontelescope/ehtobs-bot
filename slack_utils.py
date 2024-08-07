@@ -43,7 +43,7 @@ https://api.slack.com/authentication/basics  # add app and get oauth token
 This file has strict syntax - notice the lack of trailing commas!
 You can test its syntax with
 
-$ jq . ~/.slack-secrets
+$ python -m json.tool ~/.slack-secrets
 '''
 
 LOGGER = logging.getLogger(__name__)

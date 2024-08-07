@@ -1,0 +1,6 @@
+slack-sdk
+#pyvexfile @ git+https://github.com/bmarcote/vex.git
+pyvexfile @ file:///home/astrogreg/github/vex
+
+# development
+flake8
