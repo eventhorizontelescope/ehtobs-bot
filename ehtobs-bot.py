@@ -27,8 +27,13 @@ def get_events(vexfile):
         entry = scan['start']
         # start = 2023y109d17h25m00s; mode=band6; source=3C84;
         # in theory the vex parser should split these entries, but it doesn't
-        start = entry.value.split(';')[0]
+        parts = entry.value.split(';')
+        start = parts[0]
         start = datetime.datetime.strptime(start, vex_date_format).timestamp()
+        if len(parts) > 2:
+            source = parts[2].replace(' source=', '', 1)
+        else:
+            source = ''
 
         s_stations = []
         s_starts = []
@@ -40,6 +45,11 @@ def get_events(vexfile):
             entries = [entries]
         for entry in entries:
             s_station = entry.value[0]
+
+            # 2025 quirk
+            if s_station == 'Pc':
+                continue
+
             all_stations.add(s_station)
             s_start = vex_duration(entry.value[1])
             if s_station not in sfirst:
@@ -58,8 +68,8 @@ def get_events(vexfile):
             raise ValueError('different s_start in', s_ends)
 
         station_string = ':'.join(sorted(s_stations))
-        events.append((start, 'start of scan '+scan.name, station_string))
-        events.append((start+s_ends[0], 'end of scan '+scan.name, station_string))
+        events.append((start, 'start of scan '+scan.name, station_string, source))
+        events.append((start+s_ends[0], 'end of scan '+scan.name, station_string, source))
 
     assert len(s_starts) == len(s_ends)
 
@@ -72,15 +82,15 @@ def get_events(vexfile):
 
     for start, stations in start_to_stations.items():
         station_string = ':'.join(sorted(stations))
-        events.append((start - 3600, 'first scan in 1 hour', station_string))
-        events.append((start - 300, 'first scan in 5 minutes', station_string))
+        events.append((start - 3600, 'first scan in 1 hour', station_string, ''))
+        events.append((start - 300, 'first scan in 5 minutes', station_string, ''))
     for end, stations in end_to_stations.items():
-        events.append((end, 'last scan done', ':'.join(sorted(stations))))
+        events.append((end, 'last scan done', ':'.join(sorted(stations)), ''))
 
     # sort events by time
     events = sorted(events)  # defaults to first element
     final = max([x for x in end_to_stations.keys()])
-    events.append((final, 'end of schedule', 'for all stations'))
+    events.append((final, 'end of schedule', 'for all stations', ''))
 
     return events
 
@@ -91,10 +101,10 @@ webhook = slack_utils.get_slack_webhook('eht', 'ehtobs_bots_schedule')
 
 for e in events:
     now = time.time()
-    t, message, stations = e
+    t, message, stations, source = e
 
     if t < now-2 and beginning:
-        print('skipping', message, stations)
+        print('skipping', message, stations, source)
         continue
     beginning = False
 
@@ -102,5 +112,5 @@ for e in events:
     if delta > 0:
         time.sleep(delta)
 
-    print(message, stations)
-    slack_utils.slack_message(message+' '+stations, webhook)
+    print(message, stations, source)
+    slack_utils.slack_message(message+' '+stations+' '+source, webhook)
