@@ -69,7 +69,7 @@ def get_events(vexfile):
 
         station_string = ':'.join(sorted(s_stations))
         events.append((start, 'start of scan '+scan.name, station_string, source))
-        events.append((start+s_ends[0], 'end of scan '+scan.name, station_string, source))
+        events.append((start+s_ends[0], 'end of scan   '+scan.name, station_string, source))
 
     assert len(s_starts) == len(s_ends)
 
@@ -112,5 +112,5 @@ for e in events:
     if delta > 0:
         time.sleep(delta)
 
-    print(message, stations, source)
+    print(message, stations, source, flush=True)
     slack_utils.slack_message(message+' '+stations+' '+source, webhook)
