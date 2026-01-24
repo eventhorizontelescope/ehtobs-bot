@@ -1,4 +1,5 @@
 slack-sdk
+humanize
 #pyvexfile @ git+https://github.com/bmarcote/vex.git
 pyvexfile @ file:///home/astrogreg/github/vex
 

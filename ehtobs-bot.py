@@ -1,8 +1,9 @@
-import sys
-import datetime
 from collections import defaultdict
 import time
+from argparse import ArgumentParser
+from datetime import datetime, timezone
 
+import humanize
 import pyvexfile
 import slack_utils
 
@@ -13,7 +14,7 @@ def vex_duration(value):
     return int(value.replace(' sec', '').strip())
 
 
-def get_events(vexfile):
+def get_events(vexfile, verbose=0):
     v = pyvexfile.Vex('foo', vexfile=vexfile)
     events = []
     all_stations = set()
@@ -29,7 +30,7 @@ def get_events(vexfile):
         # in theory the vex parser should split these entries, but it doesn't
         parts = entry.value.split(';')
         start = parts[0]
-        start = datetime.datetime.strptime(start, vex_date_format).timestamp()
+        start = datetime.strptime(start, vex_date_format).timestamp()
         if len(parts) > 2:
             source = parts[2].replace(' source=', '', 1)
         else:
@@ -45,10 +46,6 @@ def get_events(vexfile):
             entries = [entries]
         for entry in entries:
             s_station = entry.value[0]
-
-            # 2025 quirk
-            if s_station == 'Pc':
-                continue
 
             all_stations.add(s_station)
             s_start = vex_duration(entry.value[1])
@@ -95,22 +92,60 @@ def get_events(vexfile):
     return events
 
 
-events = get_events(sys.argv[1])
-beginning = True
-webhook = slack_utils.get_slack_webhook('eht', 'ehtobs_bots_schedule')
+def main(args=None):
+    parser = ArgumentParser(description='slackbot that posts the schedule')
+    parser.add_argument('--debug', '-d', action='store_true', help='do not post to slack')
+    parser.add_argument('--hello', action='store_true', help='say something nice at startup')
+    parser.add_argument('--verbose', '-v', action='count', help='be more verbose')
+    parser.add_argument('vexfile')
+    cmd = parser.parse_args(args=args)
 
-for e in events:
-    now = time.time()
-    t, message, stations, source = e
+    now_utc = datetime.now(timezone.utc)
+    formatted = now_utc.strftime("%Y-%m-%d %H:%M:%S %Z")
+    print(f'restart {formatted} {cmd.vexfile}', flush=True)
 
-    if t < now-2 and beginning:
-        print('skipping', message, stations, source)
-        continue
-    beginning = False
+    events = get_events(cmd.vexfile, verbose=cmd.verbose)
 
-    delta = t - now
-    if delta > 0:
-        time.sleep(delta)
+    if cmd.verbose:
+        print(f'there are {len(events)} events')
+        if cmd.verbose > 1:
+            for e in events:
+                t, message, stations, source = e
+                print(message+' '+stations+' '+source)
 
-    print(message, stations, source, flush=True)
-    slack_utils.slack_message(message+' '+stations+' '+source, webhook)
+    # grab the webhook even in debug mode, so that we know it's there
+    webhook = slack_utils.get_slack_webhook('eht', 'ehtobs_bots_schedule')
+
+    beginning = True
+
+    for e in events:
+        now = time.time()
+        t, message, stations, source = e
+
+        if t < now-10 and beginning:  # 10 seconds where we might double-post at restart
+            if cmd.verbose:
+                print('skipping', message, stations, source)
+            continue
+
+        delta = t - now
+
+        if beginning and cmd.hello:
+            message = f'Hello! We are running {cmd.vexfile} and the first scan is in {humanize.precisedelta(round(delta,0))}'
+            print(message)
+            if not cmd.debug:
+                slack_utils.slack_message(message)
+
+        beginning = False
+
+        if delta > 0:
+            if cmd.verbose:
+                print(f'sleeping for {delta} seconds', flush=True)
+            time.sleep(delta)
+
+        print(message, stations, source, flush=True)
+        if not cmd.debug:
+            slack_utils.slack_message(message+' '+stations+' '+source, webhook)
+
+
+if __name__ == '__main__':
+    main()
