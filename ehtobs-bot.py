@@ -133,7 +133,7 @@ def main(args=None):
             message = f'Hello! We are running {cmd.vexfile} and the first scan is in {humanize.precisedelta(round(delta,0))}'
             print(message)
             if not cmd.debug:
-                slack_utils.slack_message(message)
+                slack_utils.slack_message(message, webhook)
 
         beginning = False
 
