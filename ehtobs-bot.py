@@ -130,10 +130,10 @@ def main(args=None):
         delta = t - now
 
         if beginning and cmd.hello:
-            message = f'Hello! We are running {cmd.vexfile} and the first scan is in {humanize.precisedelta(round(delta,0))}'
-            print(message)
+            mmessage = f'Hello! We are running {cmd.vexfile} and the first scan is in {humanize.precisedelta(round(delta,0))}'
+            print(mmessage)
             if not cmd.debug:
-                slack_utils.slack_message(message, webhook)
+                slack_utils.slack_message(mmessage, webhook)
 
         beginning = False
 
