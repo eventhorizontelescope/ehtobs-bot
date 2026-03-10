@@ -144,6 +144,7 @@ def main(args=None):
 
         print(message, stations, source, flush=True)
         if not cmd.debug:
+            stations = '`' + stations + '`'  # slack phone clients ...
             slack_utils.slack_message(message+' '+stations+' '+source, webhook)
 
 
