@@ -82,12 +82,21 @@ def get_events(vexfile, verbose=0):
         events.append((start - 3600, 'first scan in 1 hour', station_string, ''))
         events.append((start - 300, 'first scan in 5 minutes', station_string, ''))
     for end, stations in end_to_stations.items():
-        events.append((end, 'last scan done', ':'.join(sorted(stations)), ''))
+        station_string = ':'.join(sorted(stations))
+        events.append((end, 'last scan done', station_string, ''))
+
+    initial = min([x for x in start_to_stations.keys()])
+    stations = start_to_stations[initial]
+    station_string = ':'.join(sorted(stations))
+    events.append((initial - 21600, 'start of schedule in 6h', station_string, ''))
+    events.append((initial - 10800, 'start of schedule in 3h', station_string, ''))
+    events.append((initial - 7200, 'start of schedule in 2h', station_string, ''))
+
+    final = max([x for x in end_to_stations.keys()])
+    events.append((final, 'end of schedule', 'for all stations', ''))
 
     # sort events by time
     events = sorted(events)  # defaults to first element
-    final = max([x for x in end_to_stations.keys()])
-    events.append((final, 'end of schedule', 'for all stations', ''))
 
     return events
 
@@ -144,7 +153,8 @@ def main(args=None):
 
         print(message, stations, source, flush=True)
         if not cmd.debug:
-            stations = '`' + stations + '`'  # slack phone clients ...
+            if ':' in stations:
+                stations = '`' + stations + '`'  # slack phone clients ...
             slack_utils.slack_message(message+' '+stations+' '+source, webhook)
 
 
