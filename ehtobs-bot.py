@@ -88,9 +88,9 @@ def get_events(vexfile, verbose=0):
     initial = min([x for x in start_to_stations.keys()])
     stations = start_to_stations[initial]
     station_string = ':'.join(sorted(stations))
-    events.append((initial - 21600, 'start of schedule in 6h', station_string, ''))
-    events.append((initial - 10800, 'start of schedule in 3h', station_string, ''))
-    events.append((initial - 7200, 'start of schedule in 2h', station_string, ''))
+    events.append((initial - 21600, 'start of schedule in 6 hours', station_string, ''))
+    events.append((initial - 10800, 'start of schedule in 3 hours', station_string, ''))
+    events.append((initial - 7200, 'start of schedule in 2 hours', station_string, ''))
 
     final = max([x for x in end_to_stations.keys()])
     events.append((final, 'end of schedule', 'for all stations', ''))
