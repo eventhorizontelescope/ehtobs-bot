@@ -140,7 +140,8 @@ def main(args=None):
         delta = t - now
 
         if beginning and cmd.hello:
-            mmessage = f'Hello! We are running {cmd.vexfile} and the first scan is in {humanize.precisedelta(round(delta,0))}'
+            hum = humanize.precisedelta(round(delta, 0)).replace('minutes and', 'minustes, and')  # oxford comma
+            mmessage = f'Hello! We are running {cmd.vexfile} and the first scan is in {hum}'
             print(mmessage)
             if not cmd.debug:
                 slack_utils.slack_message(mmessage, webhook)
