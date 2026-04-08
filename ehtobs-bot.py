@@ -140,7 +140,7 @@ def main(args=None):
         delta = t - now
 
         if beginning and cmd.hello:
-            hum = humanize.precisedelta(round(delta, 0)).replace('minutes and', 'minustes, and')  # oxford comma
+            hum = humanize.precisedelta(round(delta, 0)).replace('minutes and', 'minutes, and')  # oxford comma
             mmessage = f'Hello! We are running {cmd.vexfile} and the first scan is in {hum}'
             print(mmessage)
             if not cmd.debug:
