@@ -99,7 +99,7 @@ def get_events(vexfile, verbose=0):
     # sort events by time
     events = sorted(events)  # defaults to first element
 
-    return events
+    return events, initial
 
 
 def main(args=None):
@@ -114,7 +114,7 @@ def main(args=None):
     formatted = now_utc.strftime("%Y-%m-%d %H:%M:%S %Z")
     print(f'restart {formatted} {cmd.vexfile}', flush=True)
 
-    events = get_events(cmd.vexfile, verbose=cmd.verbose)
+    events, initial = get_events(cmd.vexfile, verbose=cmd.verbose)
 
     if cmd.verbose:
         print(f'there are {len(events)} events')
@@ -140,7 +140,7 @@ def main(args=None):
         delta = t - now
 
         if beginning and cmd.hello:
-            hum = humanize.precisedelta(round(delta, 0)).replace('minutes and', 'minutes, and')  # oxford comma
+            hum = humanize.precisedelta(round(initial - now, 0)).replace('minutes and', 'minutes, and')  # oxford comma
             mmessage = f'Hello! We are running {cmd.vexfile} and the first scan is in {hum}'
             print(mmessage)
             if not cmd.debug:
