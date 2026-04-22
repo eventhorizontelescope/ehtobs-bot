@@ -1,1 +1,6 @@
 __pycache__
+old/
+*.vex
+nohup.out
+pyvexfile.py
+vex.py
