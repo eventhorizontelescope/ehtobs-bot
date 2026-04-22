@@ -5,3 +5,4 @@ pyvexfile @ file:///home/astrogreg/github/vex
 
 # development
 flake8
+pytest

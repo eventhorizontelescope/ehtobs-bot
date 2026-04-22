@@ -4,8 +4,11 @@ from argparse import ArgumentParser
 from datetime import datetime, timezone
 
 import humanize
+
 import pyvexfile
 import slack_utils
+import ehtobs_bot_utils
+
 
 vex_date_format = '%Yy%jd%Hh%Mm%Ss'
 
@@ -106,15 +109,19 @@ def main(args=None):
     parser = ArgumentParser(description='slackbot that posts the schedule')
     parser.add_argument('--debug', '-d', action='store_true', help='do not post to slack')
     parser.add_argument('--hello', action='store_true', help='say something nice at startup')
+    parser.add_argument('--broken', action='store', default='', help='stations which are not working')
     parser.add_argument('--verbose', '-v', action='count', help='be more verbose')
     parser.add_argument('vexfile')
     cmd = parser.parse_args(args=args)
+
+    broken = cmd.broken.split(':')
 
     now_utc = datetime.now(timezone.utc)
     formatted = now_utc.strftime("%Y-%m-%d %H:%M:%S %Z")
     print(f'restart {formatted} {cmd.vexfile}', flush=True)
 
     events, initial = get_events(cmd.vexfile, verbose=cmd.verbose)
+    events = events[0:2]
 
     if cmd.verbose:
         print(f'there are {len(events)} events')
@@ -156,7 +163,7 @@ def main(args=None):
         print(message, stations, source, flush=True)
         if not cmd.debug:
             if ':' in stations:
-                stations = '`' + stations + '`'  # slack phone clients ...
+                stations = ehtobs_bot_utils.stations_slack_format(stations, broken)
             slack_utils.slack_message(message+' '+stations+' '+source, webhook)
 
 
