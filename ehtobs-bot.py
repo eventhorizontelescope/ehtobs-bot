@@ -121,7 +121,6 @@ def main(args=None):
     print(f'restart {formatted} {cmd.vexfile}', flush=True)
 
     events, initial = get_events(cmd.vexfile, verbose=cmd.verbose)
-    events = events[0:2]
 
     if cmd.verbose:
         print(f'there are {len(events)} events')
